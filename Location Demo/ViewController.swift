@@ -7,19 +7,32 @@
 //
 
 import UIKit
+import CoreLocation
 
 class ViewController: UIViewController {
-
+    
     override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        locationManager.startUpdatingLocation()
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-
+    
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.delegate = self
+        manager.requestAlwaysAuthorization()
+        manager.allowsBackgroundLocationUpdates = true
+        return manager
+    }()
 }
 
+extension ViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let mostRecentLocation = locations.last else { return }
+        
+        if UIApplication.shared.applicationState == .active {
+            print("App is in foreground; New Location: \(mostRecentLocation)")
+        } else {
+            print("App is in background; New Location: \(mostRecentLocation)")
+        }
+    }
+}
